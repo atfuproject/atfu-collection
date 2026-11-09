@@ -1,5 +1,5 @@
 // Single source of truth for WhatsApp links. Number comes from settings/env, never hardcoded in components.
-export const WA_NUMBER = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "254723094777").replace(/\D/g, "");
+export const WA_NUMBER = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "254723094777").replace(/\D/g, "");
 
 export interface DesignEnquiry {
   name: string; location: string;
