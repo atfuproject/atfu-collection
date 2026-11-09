@@ -1,31 +1,29 @@
 import type { Metadata } from "next";
-import { Facebook, Instagram, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { EnquireButton } from "@/components/EnquiryModal";
 import { site } from "@/lib/site";
-import { waLink } from "@/lib/whatsapp";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: "Contact ATFU COLLECTION, a bespoke tailor in Migosi, Kisumu, Kenya, on WhatsApp or by phone.",
-  alternates: { canonical: "/contact" },
-};
+export const metadata: Metadata = { title: "Privacy Policy", description: "How ATFU COLLECTION handles the details you share when you enquire.", alternates: { canonical: "/privacy" } };
 
-export default function Contact() {
-  const row = "flex items-center gap-4 py-5 transition hover:text-gold";
+export default function Privacy() {
+  const h = "mt-10 font-display text-2xl";
   return (
-    <div className="mx-auto max-w-4xl px-5 pb-24 pt-28 md:px-10 md:pt-36">
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Contact" }]} />
-      <h1 className="mt-6 font-display text-5xl font-light md:text-7xl">Contact</h1>
-      <p className="mt-4 max-w-md text-fg/75">The quickest way to reach us is WhatsApp. Tell us what you have in mind and we’ll take it from there.</p>
-      <div className="mt-8 max-w-xs"><EnquireButton label="Send an enquiry" /></div>
-      <ul className="mt-12 divide-y divide-line/15 border-y border-line/15">
-        <li><a href={waLink()} target="_blank" rel="noopener noreferrer" className={row}><MessageCircle size={20} /> WhatsApp {site.phoneDisplay}</a></li>
-        <li><a href={`tel:+${site.whatsapp}`} className={row}><Phone size={20} /> Call {site.phoneDisplay}</a></li>
-        <li><a href={site.maps} target="_blank" rel="noopener noreferrer" className={row}><MapPin size={20} /> {site.location}, get directions</a></li>
-        <li><a href={site.instagram} target="_blank" rel="noopener noreferrer" className={row}><Instagram size={20} /> Instagram</a></li>
-        <li><a href={site.facebook} target="_blank" rel="noopener noreferrer" className={row}><Facebook size={20} /> Facebook</a></li>
-      </ul>
+    <div className="mx-auto max-w-2xl px-5 pb-24 pt-28 md:pt-36">
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Privacy Policy" }]} />
+      <h1 className="mt-6 font-display text-5xl font-light">Privacy Policy</h1>
+      <div className="mt-6 space-y-4 leading-relaxed text-fg/80">
+        <p>{site.name} is a tailoring business in {site.location}. This page explains what we collect when you use this website.</p>
+        <h2 className={h}>What we collect</h2>
+        <p>When you send an enquiry, we store your name, your country or location, your message, the design you asked about, and your phone number if you choose to give it. We also record when you press the button to open WhatsApp. This does not mean a message was sent.</p>
+        <p>We may count visits to pages and designs to understand what people find useful. These counts are not used to identify you.</p>
+        <h2 className={h}>How we use it</h2>
+        <p>We use your details only to reply to your enquiry and to manage our work. We do not sell your information.</p>
+        <h2 className={h}>WhatsApp</h2>
+        <p>Continuing to WhatsApp opens a separate service, WhatsApp, which has its own privacy terms. Your conversation there is between you and us.</p>
+        <h2 className={h}>Where it’s kept</h2>
+        <p>Enquiries are stored in a secured online database and can be seen only by authorised ATFU staff.</p>
+        <h2 className={h}>Your choices</h2>
+        <p>To ask us to correct or delete your details, message us on <a className="text-gold underline" href={`https://wa.me/${site.whatsapp}`}>WhatsApp</a>.</p>
+      </div>
     </div>
   );
 }
