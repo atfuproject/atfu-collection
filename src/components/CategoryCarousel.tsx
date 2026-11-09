@@ -27,10 +27,10 @@ export function CategoryCarousel() {
 
   useEffect(() => {
     reduce.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const io = new IntersectionObserver(([e]) => { inView.current = e.isIntersecting; }, { threshold: 0.4 });
+    const io = new IntersectionObserver(([e]) => { inView.current = e.isIntersecting; }, { threshold: 0.15 });
     if (root.current) io.observe(root.current);
     const id = setInterval(() => {
-      if (reduce.current || !inView.current || hover.current || document.hidden || Date.now() < pausedUntil.current) return;
+      if (!inView.current || hover.current || document.hidden || Date.now() < pausedUntil.current) return;
       go(activeRef.current + 1);
     }, 4500);
     return () => { io.disconnect(); clearInterval(id); };
@@ -43,12 +43,12 @@ export function CategoryCarousel() {
     Array.from(t.children).forEach((c, i) => { const diff = Math.abs((c as HTMLElement).offsetLeft - pad - t.scrollLeft); if (diff < d) { d = diff; best = i; } });
     activeRef.current = best; setActive(best);
   };
-  const down = (e: React.PointerEvent) => { if (e.pointerType !== "mouse") return; const t = track.current!; drag.current = { down: true, x: e.clientX, left: t.scrollLeft, moved: false }; t.style.scrollSnapType = "none"; touch(); };
+  const down = (e: React.PointerEvent) => { touch(); if (e.pointerType !== "mouse") return; const t = track.current!; drag.current = { down: true, x: e.clientX, left: t.scrollLeft, moved: false }; t.style.scrollSnapType = "none"; touch(); };
   const move = (e: React.PointerEvent) => { const d = drag.current; if (!d.down) return; const dx = e.clientX - d.x; if (Math.abs(dx) > 4) d.moved = true; track.current!.scrollLeft = d.left - dx; };
   const up = () => { const d = drag.current; if (!d.down) return; d.down = false; const t = track.current!; t.style.scrollSnapType = ""; go(activeRef.current); };
 
   return (
-    <section ref={root} aria-label="Discover your style" className="py-24 md:py-32" onMouseEnter={() => (hover.current = true)} onMouseLeave={() => (hover.current = false)} onFocusCapture={touch} onTouchStart={touch}>
+    <section ref={root} aria-label="Discover your style" className="py-24 md:py-32" onPointerEnter={(e) => { if (e.pointerType === "mouse") hover.current = true; }} onPointerLeave={() => (hover.current = false)} onFocusCapture={touch} onTouchStart={touch}>
       <div className="mx-auto flex max-w-7xl items-end justify-between px-5 md:px-10">
         <h2 className="font-display text-4xl font-light md:text-6xl">Discover your style</h2>
         <div className="hidden gap-2 md:flex">
