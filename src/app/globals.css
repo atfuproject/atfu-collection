@@ -1,0 +1,14 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+:root, [data-theme="dark"] {
+  --bg: 17 17 17; --surface: 27 27 27; --fg: 245 241 233; --gold: 197 167 125; --line: 245 241 233;
+  color-scheme: dark;
+}
+[data-theme="light"] {
+  --bg: 245 241 233; --surface: 232 224 211; --fg: 36 32 28; --gold: 133 103 58; --line: 36 32 28;
+  color-scheme: light;
+}
+html { scroll-behavior: smooth; }
+body { @apply bg-bg text-fg font-sans antialiased; transition: background-color .4s ease, color .4s ease; overflow-x: hidden; }
+:focus-visible { outline: 2px solid rgb(var(--gold)); outline-offset: 3px; }
+.no-scrollbar { scrollbar-width: none; } .no-scrollbar::-webkit-scrollbar { display: none; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, ::before, ::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
