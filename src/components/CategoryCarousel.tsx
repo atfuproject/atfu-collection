@@ -3,14 +3,13 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Img } from "./Img";
-import { collections } from "@/lib/site";
 
 const SPEED = 45;        // pixels per second of continuous drift
 const PAUSE_MS = 8000;   // pause after a tap, swipe or click, then drift resumes from where it is
-const n = collections.length;
-const loop = [...collections, ...collections]; // second copy makes the loop seamless
 
-export function CategoryCarousel() {
+export function CategoryCarousel({ items }: { items: { slug: string; title: string; cover: string | null }[] }) {
+  const n = items.length;
+  const loop = [...items, ...items]; // second copy makes the loop seamless
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLUListElement>(null);
   const [active, setActive] = useState(0);
@@ -69,6 +68,7 @@ export function CategoryCarousel() {
   const move = (e: React.PointerEvent) => { const d = drag.current; if (!d.down) return; const dx = e.clientX - d.x; if (Math.abs(dx) > 4) d.moved = true; track.current!.scrollLeft = d.left - dx; };
   const up = () => { if (drag.current.down) { drag.current.down = false; touch(); } };
 
+  if (!n) return null;
   return (
     <section ref={root} aria-label="Discover your style" className="py-24 md:py-32"
       onPointerEnter={(e) => { if (e.pointerType === "mouse") hover.current = true; }} onPointerLeave={() => (hover.current = false)} onFocusCapture={touch}>
@@ -96,7 +96,7 @@ export function CategoryCarousel() {
         ))}
       </ul>
       <div className="mt-8 flex justify-center gap-2" role="tablist" aria-label="Collection slides">
-        {collections.map((c, i) => (
+        {items.map((c, i) => (
           <button key={c.slug} role="tab" aria-selected={i === active} aria-label={`Show ${c.title}`} onClick={() => toDot(i)} className="grid h-8 w-8 place-items-center">
             <span className={`block h-px transition-all ${i === active ? "w-8 bg-gold" : "w-4 bg-fg/40"}`} />
           </button>
