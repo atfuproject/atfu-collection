@@ -1,6 +1,6 @@
 // Public read layer. Works without Supabase configured (falls back to the static collection list, designs show an empty state).
 import { createClient } from "@supabase/supabase-js";
-import { collections as staticCollections } from "./site";
+import { collections as staticCollections, defaultBiography } from "./site";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL, anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const db = url && anon
@@ -73,4 +73,25 @@ export async function getHeroImage(): Promise<string | null> {
   if (!db) return null;
   const { data } = await db.from("site_settings").select("value").eq("key", "hero").maybeSingle();
   return mediaUrl((data?.value as { path?: string } | null)?.path);
+}
+
+export async function getBiography(): Promise<string> {
+  if (!db) return defaultBiography;
+  const { data } = await db.from("site_settings").select("value").eq("key", "biography").maybeSingle();
+  return ((data?.value as { text?: string } | null)?.text ?? "").trim() || defaultBiography;
+}
+
+export async function getFeaturedDesigns(limit = 6): Promise<CardData[]> {
+  if (!db) return [];
+  const { data } = await db.from("designs").select("slug,reference,name,collections(title),design_images(path,alt,is_cover,sort_order)")
+    .eq("status", "published").eq("featured", true).order("featured_order", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }).limit(limit);
+  return (data ?? []).map(toCard);
+}
+
+export type TestimonialData = { id: string; author_name: string; author_detail: string | null; quote: string; photo: string | null };
+export async function getTestimonials(limit = 3): Promise<TestimonialData[]> {
+  if (!db) return [];
+  const { data } = await db.from("testimonials").select("id,author_name,author_detail,quote,photo_path").eq("published", true)
+    .order("featured", { ascending: false }).order("created_at", { ascending: false }).limit(limit);
+  return (data ?? []).map((t: any) => ({ id: t.id, author_name: t.author_name, author_detail: t.author_detail, quote: t.quote, photo: mediaUrl(t.photo_path) }));
 }
