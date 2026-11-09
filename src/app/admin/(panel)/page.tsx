@@ -1,61 +1,48 @@
 "use client";
-import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { getBrowser } from "@/lib/supabase/browser";
-import { canContent, canEnquiries, useProfile } from "@/components/admin/AdminShell";
-import { fmt } from "@/components/admin/ui";
+import { canContent, useProfile } from "@/components/admin/AdminShell";
+import { btn } from "@/components/admin/ui";
+import { compress } from "@/lib/image";
+import { mediaUrl } from "@/lib/media";
 
-export default function Dashboard() {
-  const me = useProfile();
-  const [n, setN] = useState<Record<string, number>>({});
-  const [recent, setRecent] = useState<any[]>([]);
-  useEffect(() => {
-    const sb = getBrowser()!;
-    const count = async (table: string, col?: string, val?: string) => {
-      let q = sb.from(table).select("id", { count: "exact", head: true });
-      if (col) q = q.eq(col, val!);
-      return (await q).count ?? 0;
-    };
-    (async () => {
-      const r: Record<string, number> = {};
-      if (canContent(me.role)) { r.designs = await count("designs"); r.published = await count("designs", "status", "published"); r.draft = await count("designs", "status", "draft"); }
-      if (canEnquiries(me.role)) {
-        r.enq = await count("enquiries"); r.new = await count("enquiries", "status", "new");
-        r.contacted = await count("enquiries", "status", "contacted"); r.converted = await count("enquiries", "status", "converted");
-        const { data } = await sb.from("enquiries").select("id,full_name,location,design_name,status,created_at").order("created_at", { ascending: false }).limit(6);
-        setRecent(data ?? []);
-      }
-      setN(r);
-    })();
-  }, [me.role]);
-  const cards: [string, string, boolean][] = [
-    ["Total designs", "designs", canContent(me.role)], ["Published", "published", canContent(me.role)], ["Drafts", "draft", canContent(me.role)],
-    ["Total enquiries", "enq", canEnquiries(me.role)], ["New", "new", canEnquiries(me.role)], ["Contacted", "contacted", canEnquiries(me.role)], ["Converted", "converted", canEnquiries(me.role)],
-  ];
+export default function HomepageAdmin() {
+  const me = useProfile(); const sb = getBrowser()!;
+  const [path, setPath] = useState<string | null>(null);
+  const [msg, setMsg] = useState(""); const [busy, setBusy] = useState(false);
+  useEffect(() => { sb.from("site_settings").select("value").eq("key", "hero").maybeSingle().then(({ data }) => setPath(data?.value?.path ?? null)); }, [sb]);
+  if (!canContent(me.role)) return <p>You don’t have access to this page.</p>;
+
+  async function upload(file?: File) {
+    if (!file) return; setMsg("");
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 25 * 1024 * 1024) { setMsg("Use a JPG, PNG or WebP photo under 25 MB."); return; }
+    setBusy(true);
+    try {
+      const blob = await compress(file, 2400, 0.85);
+      const next = `site/hero-${Date.now()}.webp`;
+      const up = await sb.storage.from("media").upload(next, blob, { contentType: blob.type, cacheControl: "31536000" });
+      if (up.error) throw up.error;
+      const sv = await sb.from("site_settings").upsert({ key: "hero", value: { path: next }, updated_at: new Date().toISOString() });
+      if (sv.error) throw sv.error;
+      if (path) await sb.storage.from("media").remove([path]);
+      setPath(next); setMsg("Saved. The homepage updates within a minute.");
+    } catch (e: any) { setMsg(e.message ?? "Upload failed."); }
+    setBusy(false);
+  }
+
   return (
-    <div>
-      <h1 className="font-display text-4xl">Welcome{me.full_name ? `, ${me.full_name}` : ""}</h1>
-      <ul className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-        {cards.filter((c) => c[2]).map(([label, key]) => (
-          <li key={key} className="border border-line/15 bg-surface p-4"><p className="text-sm text-fg/65">{label}</p><p className="mt-1 font-display text-4xl">{n[key] ?? "–"}</p></li>
-        ))}
-      </ul>
-      {canEnquiries(me.role) && (
-        <section className="mt-12">
-          <div className="flex items-center justify-between"><h2 className="font-display text-2xl">Recent enquiries</h2><Link href="/admin/enquiries" className="text-sm text-gold">View all</Link></div>
-          {recent.length ? (
-            <ul className="mt-4 divide-y divide-line/10 border border-line/15">
-              {recent.map((e) => (
-                <li key={e.id} className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm">
-                  <span><strong>{e.full_name}</strong>, {e.location}{e.design_name ? ` · ${e.design_name}` : ""}</span>
-                  <span className="text-fg/60">{e.status} · {fmt(e.created_at)}</span>
-                </li>
-              ))}
-            </ul>
-          ) : <p className="mt-4 text-fg/65">No enquiries yet. They’ll appear here as soon as someone submits the form.</p>}
-        </section>
-      )}
-      <p className="mt-12 text-sm text-fg/55">Charts, date filters and most-viewed designs arrive with the analytics phase.</p>
+    <div className="max-w-2xl">
+      <h1 className="font-display text-4xl">Homepage</h1>
+      <h2 className="mt-8 font-display text-2xl">Main banner photograph</h2>
+      <p className="mt-1 text-sm text-fg/60">The large photo at the top of the homepage. A tall or square photo of the owner, with space around the head, crops best on phones.</p>
+      <div className="relative mt-5 aspect-[4/5] max-w-sm overflow-hidden bg-surface">
+        {path ? <Image src={mediaUrl(path)!} alt="Current homepage banner" fill sizes="384px" className="object-cover" /> : <p className="p-4 text-sm text-fg/55">No banner photo yet. The homepage shows a placeholder.</p>}
+      </div>
+      <label className={`mt-5 inline-block cursor-pointer ${btn}`}>{busy ? "Uploading…" : path ? "Replace photograph" : "Upload photograph"}
+        <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={busy} onChange={(e) => { upload(e.target.files?.[0]); e.target.value = ""; }} />
+      </label>
+      {msg && <p role="status" className="mt-3 text-sm text-gold">{msg}</p>}
     </div>
   );
 }
