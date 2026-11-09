@@ -38,6 +38,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const links = [
     { href: "/admin", label: "Dashboard", show: true },
     { href: "/admin/designs", label: "Designs", show: canContent(profile.role) },
+    { href: "/admin/homepage", label: "Homepage", show: canContent(profile.role) },
     { href: "/admin/enquiries", label: "Enquiries", show: canEnquiries(profile.role) },
   ].filter((l) => l.show);
   return (
