@@ -7,7 +7,7 @@ import { waLink } from "@/lib/whatsapp";
 
 const words = "Tailored to make a statement.".split(" ");
 
-export function Hero() {
+export function Hero({ image = null }: { image?: string | null }) {
   const reduce = useReducedMotion();
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 900], [0, reduce ? 0 : 110]);
@@ -15,7 +15,7 @@ export function Hero() {
     <section className="relative flex min-h-[100svh] items-end overflow-hidden">
       {/* single static image, never auto-rotates */}
       <motion.div style={{ y }} className="absolute inset-x-0 -top-10 bottom-0 md:left-[38%]">
-        <Img src={site.heroImage} alt="The founder of ATFU COLLECTION" priority label="Owner photograph placeholder" />
+        <Img src={image} alt="The founder of ATFU COLLECTION" priority label="Owner photograph placeholder" />
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/50 to-transparent md:bg-gradient-to-r md:from-bg md:via-bg/70 md:to-transparent" />
       <div className="relative mx-auto w-full max-w-7xl px-5 pb-20 pt-32 md:px-10 md:pb-28">
