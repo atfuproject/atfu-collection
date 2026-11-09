@@ -68,3 +68,9 @@ export async function getRelated(collectionId: string, excludeId: string): Promi
     .eq("collection_id", collectionId).eq("status", "published").neq("id", excludeId).limit(4);
   return (data ?? []).map(toCard);
 }
+
+export async function getHeroImage(): Promise<string | null> {
+  if (!db) return null;
+  const { data } = await db.from("site_settings").select("value").eq("key", "hero").maybeSingle();
+  return mediaUrl((data?.value as { path?: string } | null)?.path);
+}
