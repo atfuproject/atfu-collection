@@ -1,48 +1,72 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getBrowser } from "@/lib/supabase/browser";
 import { canContent, useProfile } from "@/components/admin/AdminShell";
-import { btn } from "@/components/admin/ui";
+import { btn, btn2, field } from "@/components/admin/ui";
 import { compress } from "@/lib/image";
 import { mediaUrl } from "@/lib/media";
 
-export default function HomepageAdmin() {
-  const me = useProfile(); const sb = getBrowser()!;
-  const [path, setPath] = useState<string | null>(null);
-  const [msg, setMsg] = useState(""); const [busy, setBusy] = useState(false);
-  useEffect(() => { sb.from("site_settings").select("value").eq("key", "hero").maybeSingle().then(({ data }) => setPath(data?.value?.path ?? null)); }, [sb]);
-  if (!canContent(me.role)) return <p>You don’t have access to this page.</p>;
+type T = { id: string; author_name: string; author_detail: string | null; quote: string; photo_path: string | null; published: boolean; featured: boolean };
 
-  async function upload(file?: File) {
-    if (!file) return; setMsg("");
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 25 * 1024 * 1024) { setMsg("Use a JPG, PNG or WebP photo under 25 MB."); return; }
-    setBusy(true);
+function Row({ t, reload }: { t: T; reload: () => void }) {
+  const sb = getBrowser()!;
+  const [f, setF] = useState({ author_name: t.author_name, author_detail: t.author_detail ?? "", quote: t.quote, published: t.published, featured: t.featured });
+  const [msg, setMsg] = useState("");
+  const save = async () => { const { error } = await sb.from("testimonials").update({ ...f, author_detail: f.author_detail || null }).eq("id", t.id); setMsg(error ? error.message : "Saved."); };
+  const del = async () => { if (!confirm("Delete this testimonial?")) return; if (t.photo_path) await sb.storage.from("media").remove([t.photo_path]); await sb.from("testimonials").delete().eq("id", t.id); reload(); };
+  const photo = async (file?: File) => {
+    if (!file) return;
     try {
-      const blob = await compress(file, 2400, 0.85);
-      const next = `site/hero-${Date.now()}.webp`;
-      const up = await sb.storage.from("media").upload(next, blob, { contentType: blob.type, cacheControl: "31536000" });
-      if (up.error) throw up.error;
-      const sv = await sb.from("site_settings").upsert({ key: "hero", value: { path: next }, updated_at: new Date().toISOString() });
-      if (sv.error) throw sv.error;
-      if (path) await sb.storage.from("media").remove([path]);
-      setPath(next); setMsg("Saved. The homepage updates within a minute.");
+      const blob = await compress(file, 800, 0.85); const path = `testimonials/${t.id}-${Date.now()}.webp`;
+      const up = await sb.storage.from("media").upload(path, blob, { contentType: blob.type }); if (up.error) throw up.error;
+      await sb.from("testimonials").update({ photo_path: path }).eq("id", t.id); if (t.photo_path) await sb.storage.from("media").remove([t.photo_path]); reload();
     } catch (e: any) { setMsg(e.message ?? "Upload failed."); }
-    setBusy(false);
-  }
-
+  };
   return (
-    <div className="max-w-2xl">
-      <h1 className="font-display text-4xl">Homepage</h1>
-      <h2 className="mt-8 font-display text-2xl">Main banner photograph</h2>
-      <p className="mt-1 text-sm text-fg/60">The large photo at the top of the homepage. A tall or square photo of the owner, with space around the head, crops best on phones.</p>
-      <div className="relative mt-5 aspect-[4/5] max-w-sm overflow-hidden bg-surface">
-        {path ? <Image src={mediaUrl(path)!} alt="Current homepage banner" fill sizes="384px" className="object-cover" /> : <p className="p-4 text-sm text-fg/55">No banner photo yet. The homepage shows a placeholder.</p>}
+    <li className="space-y-3 border border-line/15 p-4">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input aria-label="Name" className={field} value={f.author_name} onChange={(e) => setF({ ...f, author_name: e.target.value })} />
+        <input aria-label="Detail, for example a town" placeholder="Detail (optional)" className={field} value={f.author_detail} onChange={(e) => setF({ ...f, author_detail: e.target.value })} />
       </div>
-      <label className={`mt-5 inline-block cursor-pointer ${btn}`}>{busy ? "Uploading…" : path ? "Replace photograph" : "Upload photograph"}
-        <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={busy} onChange={(e) => { upload(e.target.files?.[0]); e.target.value = ""; }} />
-      </label>
-      {msg && <p role="status" className="mt-3 text-sm text-gold">{msg}</p>}
+      <textarea aria-label="Testimonial" rows={3} className={field} value={f.quote} onChange={(e) => setF({ ...f, quote: e.target.value })} />
+      <div className="flex flex-wrap items-center gap-4 text-sm">
+        <label className="flex items-center gap-2"><input type="checkbox" className="h-5 w-5 accent-[#C5A77D]" checked={f.published} onChange={(e) => setF({ ...f, published: e.target.checked })} /> Published</label>
+        <label className="flex items-center gap-2"><input type="checkbox" className="h-5 w-5 accent-[#C5A77D]" checked={f.featured} onChange={(e) => setF({ ...f, featured: e.target.checked })} /> Featured (shown first)</label>
+        {t.photo_path && <span className="relative h-10 w-10 overflow-hidden rounded-full"><Image src={mediaUrl(t.photo_path)!} alt="" fill sizes="40px" className="object-cover" /></span>}
+        <label className={`cursor-pointer ${btn2} py-2`}>{t.photo_path ? "Replace photo" : "Add photo (with permission)"}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => { photo(e.target.files?.[0]); e.target.value = ""; }} /></label>
+      </div>
+      <div className="flex flex-wrap items-center gap-2"><button onClick={save} className={btn}>Save</button><button onClick={del} className={btn2}>Delete</button>{msg && <span role="status" className="text-sm text-gold">{msg}</span>}</div>
+    </li>
+  );
+}
+
+export default function TestimonialsAdmin() {
+  const me = useProfile(); const sb = getBrowser()!;
+  const [rows, setRows] = useState<T[] | null>(null); const [n, setN] = useState({ author_name: "", author_detail: "", quote: "" }); const [err, setErr] = useState("");
+  const reload = useCallback(() => { sb.from("testimonials").select("*").order("created_at", { ascending: false }).then(({ data }) => setRows((data ?? []) as T[])); }, [sb]);
+  useEffect(reload, [reload]);
+  if (!canContent(me.role)) return <p>You don’t have access to this page.</p>;
+  const add = async (e: React.FormEvent) => {
+    e.preventDefault(); setErr("");
+    const { error } = await sb.from("testimonials").insert({ author_name: n.author_name.trim(), author_detail: n.author_detail.trim() || null, quote: n.quote.trim() });
+    if (error) setErr(error.message); else { setN({ author_name: "", author_detail: "", quote: "" }); reload(); }
+  };
+  return (
+    <div className="max-w-3xl">
+      <h1 className="font-display text-4xl">Testimonials</h1>
+      <p className="mt-2 text-sm text-fg/60">Only add words a customer has really said, and a photo only with their permission. The homepage section stays hidden until at least one is published.</p>
+      <form onSubmit={add} className="mt-8 space-y-3 border border-line/15 p-4">
+        <h2 className="font-display text-2xl">Add a testimonial</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input required aria-label="Name" placeholder="Customer name" className={field} value={n.author_name} onChange={(e) => setN({ ...n, author_name: e.target.value })} />
+          <input aria-label="Detail" placeholder="Detail (optional)" className={field} value={n.author_detail} onChange={(e) => setN({ ...n, author_detail: e.target.value })} />
+        </div>
+        <textarea required aria-label="Testimonial" rows={3} placeholder="What they said" className={field} value={n.quote} onChange={(e) => setN({ ...n, quote: e.target.value })} />
+        {err && <p role="alert" className="text-sm text-red-400">{err}</p>}
+        <button className={btn}>Add (saved as hidden)</button>
+      </form>
+      {rows === null ? <p className="mt-8 text-fg/60">Loading…</p> : rows.length === 0 ? <p className="mt-8 text-fg/65">No testimonials yet.</p> : <ul className="mt-8 space-y-4">{rows.map((t) => <Row key={t.id + t.photo_path} t={t} reload={reload} />)}</ul>}
     </div>
   );
 }
