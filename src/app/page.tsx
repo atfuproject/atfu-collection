@@ -1,23 +1,29 @@
-import { Hero } from "@/components/Hero";
-import { CategoryCarousel } from "@/components/CategoryCarousel";
-import { waLink } from "@/lib/whatsapp";
-import { getCollections, getHeroImage, mediaUrl } from "@/lib/data";
+import type { Metadata } from "next";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { site } from "@/lib/site";
 
-export const revalidate = 60;
+export const metadata: Metadata = { title: "Privacy Policy", description: "How ATFU COLLECTION handles the details you share when you enquire.", alternates: { canonical: "/privacy" } };
 
-export default async function Home() {
-  const [hero, cols] = await Promise.all([getHeroImage(), getCollections()]);
+export default function Privacy() {
+  const h = "mt-10 font-display text-2xl";
   return (
-    <>
-      <Hero image={hero ?? site.heroImage} />
-      <CategoryCarousel items={cols.map((c) => ({ slug: c.slug, title: c.title, cover: mediaUrl(c.cover_path) }))} />
-      {/* Phase 3+: Signature Designs, Story, Lookbook, Why ATFU, Testimonials, Instagram */}
-      <section className="mx-auto max-w-4xl px-5 py-28 text-center md:py-40">
-        <h2 className="font-display text-5xl font-light md:text-7xl">Your style deserves a personal touch.</h2>
-        <p className="mx-auto mt-6 max-w-lg text-fg/75">Discover a design you love and let us bring your vision to life.</p>
-        <a href={waLink()} target="_blank" rel="noopener noreferrer" className="mt-10 inline-block bg-gold px-10 py-4 text-sm font-medium tracking-wide text-bg transition hover:brightness-110">Start a Conversation</a>
-      </section>
-    </>
+    <div className="mx-auto max-w-2xl px-5 pb-24 pt-28 md:pt-36">
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Privacy Policy" }]} />
+      <h1 className="mt-6 font-display text-5xl font-light">Privacy Policy</h1>
+      <div className="mt-6 space-y-4 leading-relaxed text-fg/80">
+        <p>{site.name} is a tailoring business in {site.location}. This page explains what we collect when you use this website.</p>
+        <h2 className={h}>What we collect</h2>
+        <p>When you send an enquiry, we store your name, your country or location, your message, the design you asked about, and your phone number if you choose to give it. We also record when you press the button to open WhatsApp. This does not mean a message was sent.</p>
+        <p>We may count visits to pages and designs to understand what people find useful. These counts are not used to identify you.</p>
+        <h2 className={h}>How we use it</h2>
+        <p>We use your details only to reply to your enquiry and to manage our work. We do not sell your information.</p>
+        <h2 className={h}>WhatsApp</h2>
+        <p>Continuing to WhatsApp opens a separate service, WhatsApp, which has its own privacy terms. Your conversation there is between you and us.</p>
+        <h2 className={h}>Where it’s kept</h2>
+        <p>Enquiries are stored in a secured online database and can be seen only by authorised ATFU staff.</p>
+        <h2 className={h}>Your choices</h2>
+        <p>To ask us to correct or delete your details, message us on <a className="text-gold underline" href={`https://wa.me/${site.whatsapp}`}>WhatsApp</a>.</p>
+      </div>
+    </div>
   );
 }
