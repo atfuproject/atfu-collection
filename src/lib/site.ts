@@ -2,13 +2,13 @@
 export const site = {
   name: "ATFU COLLECTION",
   tagline: "A Tailor from Ukwala.",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "254723094777",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "254723094777",
   phoneDisplay: "+254 723 094 777",
   instagram: "https://www.instagram.com/atfu_collection/",
   facebook: "https://www.facebook.com/Atfucollection",
   maps: "https://maps.app.goo.gl/A2Run2Frc5xwN3bg6",
   location: "Migosi, Kisumu, Kenya",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   // Owner photograph: set to e.g. "/images/hero.jpg" (file in /public/images) or an uploaded storage URL.
   heroImage: null as string | null,
 };
@@ -26,3 +26,16 @@ export const navLinks = [
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
+
+// Used until the owner edits the biography in Admin > Homepage.
+export const defaultBiography = `ATFU COLLECTION is a fashion and tailoring brand rooted in the identity of A Tailor from Ukwala.
+
+Fashion is more than what you wear. It is an expression of individuality, confidence and personal style.
+
+From elegantly tailored men’s suits and sophisticated ladies’ outfits to tunics, wedding attire and special occasion designs, ATFU COLLECTION brings creativity and craftsmanship together to create distinctive fashion pieces.
+
+We believe that great style should feel personal. We embrace custom designs, individual preferences and the opportunity to bring each client’s vision to life.
+
+Based in Migosi, Kisumu, Kenya, ATFU COLLECTION welcomes individuals looking for something distinctive, whether they are discovering a design they love or seeking inspiration for something uniquely their own.
+
+ATFU COLLECTION. Tailored to make a statement.`;
