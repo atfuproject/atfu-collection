@@ -1,15 +1,14 @@
-// TEMPORARY wordmark. To finalize: set FINAL_LOGO_SVG to the owner's SVG (inline markup or imported component).
-// The circle emblem is intentionally NOT drawn yet, to avoid inventing a logo.
-import type { ReactNode } from "react";
+// Official ATFU COLLECTION logo. The artwork is public/images/logo-mark.png, used as a mask so it
+// takes the theme's gold automatically (champagne in dark mode, deeper gold in light mode).
+// Size it with a height class, e.g. <Logo className="h-20" />. To replace the artwork, swap the PNG
+// (keep it transparent) and update the two numbers below to its pixel size.
+const W = 1296, H = 1132;
+const mask = "url(/images/logo-mark.png)";
 
-const FINAL_LOGO_SVG: ReactNode | null = null;
-
-export function Logo({ className = "" }: { className?: string }) {
-  if (FINAL_LOGO_SVG) return <span className={className} aria-label="ATFU COLLECTION">{FINAL_LOGO_SVG}</span>;
+export function Logo({ className = "h-16" }: { className?: string }) {
   return (
-    <span className={`inline-flex flex-col leading-none text-gold ${className}`} aria-label="ATFU COLLECTION, A Tailor from Ukwala">
-      <span className="font-display text-xl tracking-[0.28em]">ATFU COLLECTION</span>
-      <span className="mt-1 font-sans text-[0.55rem] uppercase tracking-[0.35em] opacity-80">A Tailor from Ukwala</span>
+    <span role="img" aria-label="ATFU COLLECTION, A Tailor from Ukwala" className={`inline-block shrink-0 ${className}`} style={{ aspectRatio: `${W} / ${H}` }}>
+      <span className="block h-full w-full bg-gold" style={{ WebkitMaskImage: mask, maskImage: mask, WebkitMaskSize: "contain", maskSize: "contain", WebkitMaskRepeat: "no-repeat", maskRepeat: "no-repeat", WebkitMaskPosition: "center", maskPosition: "center" }} />
     </span>
   );
 }
