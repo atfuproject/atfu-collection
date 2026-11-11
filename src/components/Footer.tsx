@@ -10,7 +10,7 @@ export function Footer() {
     <footer className="border-t border-line/15 bg-surface">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-4 md:px-10">
         <div className="md:col-span-1">
-          <Logo className="h-36" />
+          <Logo className="h-52" />
           <p className="mt-5 font-display text-lg italic text-gold">{site.tagline}</p>
           <div className="mt-6 flex gap-3">
             <a href={site.instagram} target="_blank" rel="noopener noreferrer" aria-label="ATFU COLLECTION on Instagram" className={social}><Instagram size={18} /></a>
