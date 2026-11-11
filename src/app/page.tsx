@@ -1,14 +1,14 @@
 import { Hero } from "@/components/Hero";
 import { CategoryCarousel } from "@/components/CategoryCarousel";
-import { InstagramSection, SignatureDesigns, Story, Testimonials, WhyAtfu } from "@/components/home/Sections";
+import { InstagramSection, LookbookSection, SignatureDesigns, Story, Testimonials, WhyAtfu } from "@/components/home/Sections";
 import { waLink } from "@/lib/whatsapp";
-import { getBiography, getCollections, getFeaturedDesigns, getHeroImage, getTestimonials, mediaUrl } from "@/lib/data";
+import { getBiography, getCollections, getFeaturedDesigns, getHeroImage, getStories, getTestimonials, mediaUrl } from "@/lib/data";
 import { site } from "@/lib/site";
 
 export const revalidate = 60;
 
 export default async function Home() {
-  const [hero, cols, featured, bio, tests] = await Promise.all([getHeroImage(), getCollections(), getFeaturedDesigns(), getBiography(), getTestimonials()]);
+  const [hero, cols, featured, bio, tests, stories] = await Promise.all([getHeroImage(), getCollections(), getFeaturedDesigns(), getBiography(), getTestimonials(), getStories(3)]);
   const photo = hero ?? site.heroImage;
   return (
     <>
@@ -16,6 +16,7 @@ export default async function Home() {
       <CategoryCarousel items={cols.map((c) => ({ slug: c.slug, title: c.title, cover: mediaUrl(c.cover_path) }))} />
       <SignatureDesigns designs={featured} />
       <Story image={photo} bio={bio} />
+      <LookbookSection stories={stories} />
       <WhyAtfu />
       <Testimonials items={tests} />
       <InstagramSection />
