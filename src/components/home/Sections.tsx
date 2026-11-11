@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Instagram } from "lucide-react";
 import { Img } from "@/components/Img";
 import { DesignCard } from "@/components/DesignCard";
-import type { CardData, TestimonialData } from "@/lib/data";
+import type { CardData, StoryCard, TestimonialData } from "@/lib/data";
 import { site } from "@/lib/site";
 
 const wrap = "mx-auto max-w-7xl px-5 md:px-10";
@@ -86,6 +86,38 @@ export function InstagramSection() {
       <h2 id="ig" className="font-display text-4xl font-light md:text-6xl">Follow the work</h2>
       <p className="mx-auto mt-4 max-w-md text-fg/70">New designs and behind-the-scenes moments from the atelier in Kisumu.</p>
       <a href={site.instagram} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center gap-3 border border-gold px-8 py-4 text-sm text-gold transition hover:bg-gold hover:text-bg"><Instagram size={18} /> @atfu_collection</a>
+    </section>
+  );
+}
+
+export function LookbookSection({ stories }: { stories: StoryCard[] }) {
+  if (!stories.length) return null;
+  const [lead, ...rest] = stories;
+  const text = "absolute inset-x-0 bottom-0 p-5 text-[#F5F1E9] md:p-8";
+  return (
+    <section aria-labelledby="lb" className={`${wrap} py-20 md:py-28`}>
+      <div className="flex items-end justify-between gap-4">
+        <h2 id="lb" className="font-display text-4xl font-light md:text-6xl">The Lookbook</h2>
+        <Link href="/lookbook" className="shrink-0 text-sm text-gold hover:underline">View the Lookbook</Link>
+      </div>
+      <div className="mt-10 grid gap-6 md:grid-cols-12">
+        <Link href={`/lookbook/${lead.slug}`} className="group relative block aspect-[4/5] overflow-hidden md:col-span-7 md:aspect-auto md:min-h-[34rem]">
+          <Img src={lead.cover} alt={`${lead.title} by ATFU COLLECTION`} sizes="(min-width:768px) 58vw, 100vw" label="Story cover placeholder" className="transition duration-1000 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+          <div className={text}><p className="text-xs uppercase tracking-[0.25em] text-[#C5A77D]">{lead.category}</p><h3 className="mt-2 font-display text-4xl md:text-5xl">{lead.title}</h3></div>
+        </Link>
+        {rest.length > 0 && (
+          <div className="grid gap-6 md:col-span-5">
+            {rest.map((s) => (
+              <Link key={s.slug} href={`/lookbook/${s.slug}`} className="group relative block aspect-[4/3] overflow-hidden">
+                <Img src={s.cover} alt={`${s.title} by ATFU COLLECTION`} sizes="(min-width:768px) 40vw, 100vw" label="Story cover placeholder" className="transition duration-1000 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+                <div className={text}><p className="text-xs uppercase tracking-[0.25em] text-[#C5A77D]">{s.category}</p><h3 className="mt-1 font-display text-3xl">{s.title}</h3></div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
