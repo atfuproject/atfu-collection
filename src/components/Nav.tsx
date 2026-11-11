@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Logo } from "./Logo";
-import { ThemeToggle } from "./ThemeToggle";
 import { navLinks } from "@/lib/site";
 import { waLink } from "@/lib/whatsapp";
 
@@ -17,6 +16,8 @@ export function Nav() {
   const path = usePathname();
   const filled = open || solid || path !== "/";
   const overHero = !filled;
+  // Big logo on the homepage photo; a little smaller on other pages and once scrolled.
+  const size = path === "/" && !solid && !open ? "h-36 md:h-48" : solid ? "h-16 md:h-20" : "h-20 md:h-24";
   const items = [{ href: "/", label: "Home" }, ...navLinks];
   return (
     <>
@@ -25,14 +26,12 @@ export function Nav() {
         {/* On the homepage photo the header is transparent: a dark fade keeps the logo and links readable on any image. */}
         {overHero && <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-44 bg-gradient-to-b from-black/80 via-black/40 to-transparent" />}
         <nav aria-label="Main" className="mx-auto flex max-w-7xl items-center justify-between px-5 py-2 md:px-10">
-          <Link href="/" aria-label="ATFU COLLECTION home" onClick={() => setOpen(false)}><Logo className={`transition-all duration-300 ${solid ? "h-14 md:h-16" : "h-20 md:h-28"} ${overHero ? "drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]" : ""}`} /></Link>
+          <Link href="/" aria-label="ATFU COLLECTION home" onClick={() => setOpen(false)}><Logo className={`transition-all duration-300 ${size} ${overHero ? "drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]" : ""}`} /></Link>
           <div className="hidden items-center gap-8 md:flex">
             {navLinks.map((l) => <Link key={l.href} href={l.href} className="text-sm tracking-wide text-fg/80 transition hover:text-gold">{l.label}</Link>)}
-            <ThemeToggle />
             <a href={waLink()} target="_blank" rel="noopener noreferrer" className="border border-gold px-5 py-3 text-sm text-gold transition hover:bg-gold hover:text-bg">Enquire on WhatsApp</a>
           </div>
           <div className="flex items-center md:hidden">
-            <ThemeToggle />
             <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label={open ? "Close menu" : "Open menu"} className="grid h-11 w-11 place-items-center">{open ? <X size={22} /> : <Menu size={22} />}</button>
           </div>
         </nav>
