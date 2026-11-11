@@ -48,7 +48,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen">
         <header className="sticky top-0 z-30 border-b border-line/15 bg-bg">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-            <Link href="/admin"><Logo /></Link>
+            <Link href="/admin"><Logo className="h-12" /></Link>
             <div className="flex items-center gap-3 text-sm">
               <span className="hidden text-fg/60 sm:inline">{profile.full_name || "Staff"} · {profile.role.replace("_", " ")}</span>
               <button onClick={out} className="border border-fg/30 px-3 py-2 hover:border-gold hover:text-gold">Sign out</button>
