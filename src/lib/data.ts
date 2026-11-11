@@ -95,3 +95,9 @@ export async function getTestimonials(limit = 3): Promise<TestimonialData[]> {
     .order("featured", { ascending: false }).order("created_at", { ascending: false }).limit(limit);
   return (data ?? []).map((t: any) => ({ id: t.id, author_name: t.author_name, author_detail: t.author_detail, quote: t.quote, photo: mediaUrl(t.photo_path) }));
 }
+
+export async function getCollectionImages(collectionId: string): Promise<{ src: string; alt: string }[]> {
+  if (!db) return [];
+  const { data } = await db.from("collection_images").select("path,alt").eq("collection_id", collectionId).order("sort_order");
+  return (data ?? []).map((d: any) => ({ src: mediaUrl(d.path)!, alt: d.alt || "ATFU COLLECTION" }));
+}
