@@ -101,3 +101,37 @@ export async function getCollectionImages(collectionId: string): Promise<{ src: 
   const { data } = await db.from("collection_images").select("path,alt").eq("collection_id", collectionId).order("sort_order");
   return (data ?? []).map((d: any) => ({ src: mediaUrl(d.path)!, alt: d.alt || "ATFU COLLECTION" }));
 }
+
+export type StoryCard = { slug: string; title: string; category: string; description: string; cover: string | null; published_at: string | null; featured: boolean };
+const toStory = (s: any): StoryCard => ({ slug: s.slug, title: s.title, category: s.edit_category, description: s.description, cover: mediaUrl(s.cover_path), published_at: s.published_at, featured: s.featured });
+
+// Featured stories first, then newest.
+export async function getStories(limit = 24): Promise<StoryCard[]> {
+  if (!db) return [];
+  const { data } = await db.from("lookbook_stories").select("slug,title,edit_category,description,cover_path,published_at,featured").eq("status", "published")
+    .order("featured", { ascending: false }).order("published_at", { ascending: false, nullsFirst: false }).limit(limit);
+  return (data ?? []).map(toStory);
+}
+
+export async function getStory(slug: string) {
+  if (!db) return null;
+  const { data } = await db.from("lookbook_stories").select("slug,title,edit_category,description,cover_path,published_at,featured,seo_title,seo_description,collections(slug,title),lookbook_images(path,alt,sort_order)")
+    .eq("slug", slug).eq("status", "published").maybeSingle();
+  if (!data) return null;
+  const s: any = data;
+  return {
+    ...toStory(s), seo_title: s.seo_title as string | null, seo_description: s.seo_description as string | null,
+    collection: (s.collections ?? null) as { slug: string; title: string } | null,
+    images: [...(s.lookbook_images ?? [])].sort((a: any, b: any) => a.sort_order - b.sort_order).map((i: any) => ({ src: mediaUrl(i.path)!, alt: i.alt || `${s.title} by ATFU COLLECTION` })),
+  };
+}
+
+export async function getSitemapData() {
+  if (!db) return { collections: [] as { slug: string }[], designs: [] as { slug: string; updated_at: string }[], stories: [] as { slug: string; published_at: string | null }[] };
+  const [c, d, s] = await Promise.all([
+    db.from("collections").select("slug").eq("visible", true),
+    db.from("designs").select("slug,updated_at").eq("status", "published"),
+    db.from("lookbook_stories").select("slug,published_at").eq("status", "published"),
+  ]);
+  return { collections: c.data ?? [], designs: (d.data ?? []) as any[], stories: (s.data ?? []) as any[] };
+}
