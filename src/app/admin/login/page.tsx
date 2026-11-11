@@ -19,7 +19,7 @@ export default function Login() {
   return (
     <div className="grid min-h-screen place-items-center px-5">
       <form onSubmit={go} className="w-full max-w-sm space-y-4">
-        <div className="mb-8"><Logo /></div>
+        <div className="mb-8"><Logo className="h-28" /></div>
         <h1 className="font-display text-4xl">Staff sign in</h1>
         {!sb && <p role="alert" className="border border-gold/50 p-3 text-sm">Supabase isn’t connected yet. Add the environment variables in Vercel and redeploy.</p>}
         <div><label htmlFor="em" className="mb-1 block text-sm">Email</label><input id="em" type="email" required autoComplete="username" className={field} value={email} onChange={(e) => setEmail(e.target.value)} /></div>
