@@ -1,31 +1,31 @@
 import type { Metadata } from "next";
+import { Facebook, Instagram, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { Img } from "@/components/Img";
-import { getBiography, getHeroImage } from "@/lib/data";
+import { EnquireButton } from "@/components/EnquiryModal";
+import { site } from "@/lib/site";
 import { waLink } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
-  title: "About ATFU COLLECTION",
-  description: "ATFU COLLECTION is a fashion and tailoring brand in Migosi, Kisumu, Kenya, rooted in the identity of A Tailor from Ukwala.",
-  alternates: { canonical: "/about" },
+  title: "Contact",
+  description: "Contact ATFU COLLECTION, a bespoke tailor in Migosi, Kisumu, Kenya, on WhatsApp or by phone.",
+  alternates: { canonical: "/contact" },
 };
-export const revalidate = 60;
 
-export default async function About() {
-  const [bio, photo] = await Promise.all([getBiography(), getHeroImage()]);
-  const [lead, ...rest] = bio.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+export default function Contact() {
+  const row = "flex items-center gap-4 py-5 transition hover:text-gold";
   return (
-    <div className="mx-auto max-w-7xl px-5 pb-24 pt-28 md:px-10 md:pt-36">
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "About" }]} />
-      <h1 className="mt-6 font-display text-5xl font-light md:text-7xl">About ATFU</h1>
-      <div className="mt-12 grid gap-12 md:grid-cols-[0.8fr_1.2fr] md:gap-20">
-        <div className="relative aspect-[4/5] bg-surface md:sticky md:top-28 md:self-start"><Img src={photo} alt="The founder of ATFU COLLECTION" sizes="(min-width:768px) 40vw, 100vw" quality={85} label="Owner photograph placeholder" /></div>
-        <div>
-          <p className="font-display text-3xl leading-snug md:text-4xl">{lead}</p>
-          <div className="mt-8 max-w-xl space-y-5 text-lg leading-relaxed text-fg/80">{rest.map((p) => <p key={p}>{p}</p>)}</div>
-          <a href={waLink()} target="_blank" rel="noopener noreferrer" className="mt-10 inline-block bg-gold px-8 py-4 text-sm font-medium text-bg">Start a Conversation</a>
-        </div>
-      </div>
+    <div className="mx-auto max-w-4xl px-5 pb-24 pt-28 md:px-10 md:pt-36">
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Contact" }]} />
+      <h1 className="mt-6 font-display text-5xl font-light md:text-7xl">Contact</h1>
+      <p className="mt-4 max-w-md text-fg/75">The quickest way to reach us is WhatsApp. Tell us what you have in mind and we’ll take it from there.</p>
+      <div className="mt-8 max-w-xs"><EnquireButton label="Send an enquiry" /></div>
+      <ul className="mt-12 divide-y divide-line/15 border-y border-line/15">
+        <li><a href={waLink()} target="_blank" rel="noopener noreferrer" className={row}><MessageCircle size={20} /> WhatsApp {site.phoneDisplay}</a></li>
+        <li><a href={`tel:+${site.whatsapp}`} className={row}><Phone size={20} /> Call {site.phoneDisplay}</a></li>
+        <li><a href={site.maps} target="_blank" rel="noopener noreferrer" className={row}><MapPin size={20} /> {site.location}, get directions</a></li>
+        <li><a href={site.instagram} target="_blank" rel="noopener noreferrer" className={row}><Instagram size={20} /> Instagram</a></li>
+        <li><a href={site.facebook} target="_blank" rel="noopener noreferrer" className={row}><Facebook size={20} /> Facebook</a></li>
+      </ul>
     </div>
   );
 }
